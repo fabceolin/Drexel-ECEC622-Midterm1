@@ -258,6 +258,11 @@ void * chol_pthread(void * arg)
 	//Id
 	int id = args->id;
 
+    if (id == NUM_PTHREADS - 1) {
+        zeroi_end--;
+        copyi_end--;
+    }
+
 	//Iterators
 	unsigned int i, j, k;
 	unsigned int size = A.num_rows * A.num_columns;
@@ -341,7 +346,6 @@ void * chol_pthread(void * arg)
 			U.elements[i * U.num_rows + j] = 0.0;
 		}
 	}
-
 	//Don't sync, will join outside here
 }
 

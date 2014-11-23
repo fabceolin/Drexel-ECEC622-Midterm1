@@ -18,7 +18,7 @@ void print_matrix(const Matrix M){
 		for(unsigned int j = 0; j < M.num_columns; j++)
 			printf("%f ", M.elements[i*M.num_rows + j]);
 		printf("\n");
-	} 
+	}
 	printf("\n");
 }
 
@@ -39,7 +39,7 @@ int check_if_diagonal_dominant(const Matrix M)
 	float diag_element;
 	float sum;
 	for(unsigned int i = 0; i < M.num_rows; i++){
-		sum = 0.0; 
+		sum = 0.0;
 		diag_element = M.elements[i * M.num_rows + i];
 		for(unsigned int j = 0; j < M.num_columns; j++){
 			if(i != j)
@@ -53,14 +53,14 @@ int check_if_diagonal_dominant(const Matrix M)
 }
 
 
-/* A matrix M is positive definite if x^TMx > 0 for all non-zero vectors X. 
-   A matrix M is positive definite if and only if the determinant of each of the principal submatrices is positive. 
+/* A matrix M is positive definite if x^TMx > 0 for all non-zero vectors X.
+   A matrix M is positive definite if and only if the determinant of each of the principal submatrices is positive.
    A diagonally dominant NxN symmetric matrix is positive definite. This function generates a diagonally dominant NxN symmetric matrix. */
 Matrix create_positive_definite_matrix(unsigned int num_rows, unsigned int num_columns)
 {
 	Matrix M;
 	M.num_columns = M.pitch = num_columns;
-	M.num_rows = num_rows; 
+	M.num_rows = num_rows;
 	unsigned int size = M.num_rows * M.num_columns;
 	M.elements = (float *)malloc(size * sizeof(float));
 
@@ -78,7 +78,7 @@ Matrix create_positive_definite_matrix(unsigned int num_rows, unsigned int num_c
 	printf("Generating the symmetric matrix...");
 	Matrix transpose;
 	transpose.num_columns = transpose.pitch = num_columns;
-	transpose.num_rows = num_rows; 
+	transpose.num_rows = num_rows;
 	size = transpose.num_rows * transpose.num_columns;
 	transpose.elements = (float *)malloc(size * sizeof(float));
 
@@ -93,7 +93,7 @@ Matrix create_positive_definite_matrix(unsigned int num_rows, unsigned int num_c
 	{
 		printf("done. \n");
 	}
-	else{ 
+	else{
 		printf("error. \n");
 		free(M.elements);
 		M.elements = NULL;
@@ -105,7 +105,7 @@ Matrix create_positive_definite_matrix(unsigned int num_rows, unsigned int num_c
 	printf("Generating the positive definite matrix...");
 	for(i = 0; i < num_rows; i++)
 		for(j = 0; j < num_columns; j++){
-			if(i == j) 
+			if(i == j)
 				M.elements[i * M.num_rows + j] += 0.5 * M.num_rows;
 		}
 	if(check_if_diagonal_dominant(M))
@@ -127,12 +127,12 @@ Matrix create_positive_definite_matrix(unsigned int num_rows, unsigned int num_c
 }
 
 
-/* This function implements a row-oriented Cholesky decomposition on the input matrix A to generate an upper triangular matrix U 
-	such that A = U^TU. 
- */	
+/* This function implements a row-oriented Cholesky decomposition on the input matrix A to generate an upper triangular matrix U
+	such that A = U^TU.
+ */
 int chol_gold(const Matrix A, Matrix U)
 {
-	unsigned int i, j, k; 
+	unsigned int i, j, k;
 	unsigned int size = A.num_rows * A.num_columns;
 
 	// Copy the contents of the A matrix into the working matrix U
@@ -147,7 +147,7 @@ int chol_gold(const Matrix A, Matrix U)
 						 printf("Cholesky decomposition failed. \n");
 						 return 0;
 			  }
-			  
+
 			  // Division step
 			  for(j = (k + 1); j < U.num_rows; j++)
 						 U.elements[k * U.num_rows + j] /= U.elements[k * U.num_rows + k]; // Division step
@@ -173,8 +173,6 @@ int chol_gold(const Matrix A, Matrix U)
 			  for(j = 0; j < i; j++)
 						 U.elements[i * U.num_rows + j] = 0.0;
 
-	// printf("The Upper triangular matrix is: \n");
-	// print_matrix(U);
 
 	return 1;
 }
@@ -184,7 +182,7 @@ int check_chol(const Matrix A, const Matrix U)
 {
 	Matrix U_transpose;
 	U_transpose.num_columns = U_transpose.pitch = U.num_columns;
-	U_transpose.num_rows = U.num_rows; 
+	U_transpose.num_rows = U.num_rows;
 	unsigned int size = U_transpose.num_rows * U_transpose.num_columns;
 	U_transpose.elements = (float *)malloc(size * sizeof(float));
 
@@ -198,12 +196,12 @@ int check_chol(const Matrix A, const Matrix U)
 	Matrix A_recovered = matrix_multiply(U_transpose, U);
 	// print_matrix(A_recovered);
 
-	// Compare the two matrices A and A_recovered 
+	// Compare the two matrices A and A_recovered
 	for(i = 0; i < size; i++)
 	{
 			//printf("%f==%f\n", A.elements[i],A_recovered.elements[i]);
 			  if(fabs(A.elements[i] - A_recovered.elements[i]) > 0.1)
-				return 0;	
+				return 0;
 	}
 
 	return 1;
@@ -215,7 +213,7 @@ Matrix matrix_multiply(const Matrix A, const Matrix B)
 {
 		  Matrix C;
 		  C.num_columns = C.pitch = A.num_columns;
-		  C.num_rows = A.num_rows; 
+		  C.num_rows = A.num_rows;
 		  unsigned int size = C.num_rows * C.num_columns;
 		  C.elements = (float *)malloc(size * sizeof(float));
 
@@ -231,4 +229,4 @@ Matrix matrix_multiply(const Matrix A, const Matrix B)
 					 }
 		  return C;
 }
-	
+
