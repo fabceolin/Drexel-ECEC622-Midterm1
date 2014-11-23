@@ -3,7 +3,7 @@
 
 // Thread block size
 #define MATRIX_SIZE 1024
-#define NUM_PTHREADS 16
+#define NUM_PTHREADS 8
 #define NUM_OMPTHREADS	NUM_PTHREADS
 
 // Matrix dimensions
