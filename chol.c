@@ -30,7 +30,6 @@ extern Matrix create_positive_definite_matrix(unsigned int, unsigned int);
 extern int chol_gold(const Matrix, Matrix);
 extern int check_chol(const Matrix, const Matrix);
 void chol_using_pthreads(const Matrix, Matrix);
-void chol_using_openmp(const Matrix, Matrix);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -115,78 +114,7 @@ int main(int argc, char** argv)
 			  printf("Cholesky decomposition using pthreads was successful. \n");
 
 
-	/* MODIFY THIS CODE: Perform the Cholesky decomposition using openmp. The resulting upper traingular matrix should be returned in U_openmp */
-	printf("Performing Cholesky decomposition on the CPU using the OPENMP version. \n");
-	/* Start the timer here. */
-	gettimeofday(&start, NULL);
-	chol_using_openmp(A, U_openmp);
-	/* Stop timer here and determine the elapsed time. */
-	gettimeofday(&stop, NULL);
-	float omp_time=(float)(stop.tv_sec - start.tv_sec + (stop.tv_usec - start.tv_usec)/(float)1000000);
-	printf("OPENMP Overall execution time = %fs. \n", omp_time);
-
-
-	printf("Double checking for correctness by recovering the original matrix. \n");
-	if(check_chol(A, U_openmp) == 0)
-			  printf("Error performing Cholesky decomposition using openmp. \n");
-	else
-			  printf("Cholesky decomposition using openmp was successful. \n");
-
-
-	// Free host matrices
-	//free(A.elements);
-	//free(U_pthreads.elements);
-	//free(U_openmp.elements);
-	//free(reference.elements);
 	return 1;
-}
-
-/* Write code to perform Cholesky decopmposition using openmp. */
-void chol_using_openmp(const Matrix A, Matrix U)
-{
-	unsigned int i, j, k;
-	unsigned int size = A.num_rows * A.num_columns;
-
-	// Copy the contents of the A matrix into the working matrix U
-	//Parallelize this too?
-	//#pragma omp parallel for
-	for (i = 0; i < size; i ++)
-		U.elements[i] = A.elements[i];
-
-	// Perform the Cholesky decomposition in place on the U matrix
-	for(k = 0; k < U.num_rows; k++){
-			// Take the square root of the diagonal element
-			U.elements[k * U.num_rows + k] = sqrt(U.elements[k * U.num_rows + k]);
-			if(U.elements[k * U.num_rows + k] <= 0){
-					 printf("Cholesky decomposition failed. \n");
-			}
-
-			// Division step
-			//Parallelize this - seems like declaring private iterator
-			//values slows it down....?
-			#pragma omp parallel for
-			for(j = (k + 1); j < U.num_rows; j++)
-					 U.elements[k * U.num_rows + j] /= U.elements[k * U.num_rows + k]; // Division step
-
-			// Elimination step
-			float * elems = U.elements;
-			omp_set_num_threads(NUM_OMPTHREADS); // Set the number of threads
-
-			//Parallelize this
-			#pragma omp parallel for private(i,j)
-			for(i = (k + 1); i < U.num_rows; i++)
-			{
-				for(j = i; j < U.num_rows; j++)
-				{
-						U.elements[i * U.num_rows + j] -= U.elements[k * U.num_rows + i] * U.elements[k * U.num_rows + j];
-				}
-			}
-	}
-
-	// As the final step, zero out the lower triangular portion of U
-	for(i = 0; i < U.num_rows; i++)
-			  for(j = 0; j < i; j++)
-						 U.elements[i * U.num_rows + j] = 0.0;
 }
 
 //Range splitter helper function
