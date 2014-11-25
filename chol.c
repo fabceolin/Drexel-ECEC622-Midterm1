@@ -125,18 +125,10 @@ void range_splitter(int size, int num_threads, int * items_per_thread, int * ite
 	int elems_left_over = size%num_threads;
 	int elements_per_thread = size/num_threads;
 	int last_thread_elements = elements_per_thread;
+
 	if(elems_left_over !=0)
 	{
-		int not_total = elements_per_thread*(num_threads-1);
-		last_thread_elements = size - not_total;
-
-		if(last_thread_elements<0)
-		{
-			//Tooo much now
-			elements_per_thread-=2;
-			not_total = elements_per_thread*(num_threads-1);
-			last_thread_elements = size - not_total;
-		}
+		last_thread_elements = elements_per_thread+elems_left_over;
 	}
 
 	//Double check because math is hard
@@ -171,17 +163,17 @@ typedef struct chol_pthread_args
 
 void range_maker(int items_per_thread,int items_last_thread, int num_threads, int index, int offset, int is_last_thread, int * start, int * end)
 {
+
+    *start=items_per_thread*index + offset;
 	if(is_last_thread==1)
 	{
 		//Last thread
-		*start=items_per_thread*index + offset;
-		*end = items_per_thread*index + offset + items_last_thread;
+		*end = *start + items_last_thread;
 	}
 	else
 	{
 		//Regular threads
-		*start=items_per_thread*index + offset;
-		*end = items_per_thread*(index+1) -1 + offset;
+		*end = *start + items_per_thread -1;
 	}
 }
 
@@ -191,12 +183,12 @@ void populate_thread_args(chol_pthread_args * arg_list,Matrix A, Matrix U, pthre
 	unsigned int size = A.num_rows * A.num_columns;
 
 	//Copy
-	int copyisize = size-0;
+	int copyisize = size;
 	int copyi_items_per_thread, copyi_items_last_thread;
 	range_splitter(copyisize, NUM_PTHREADS, &copyi_items_per_thread, &copyi_items_last_thread);
 
 	//Zero out
-	int zeroisize = U.num_rows - 0;
+	int zeroisize = U.num_rows;
 	int zeroi_items_per_thread, zeroi_items_last_thread;
 	range_splitter(zeroisize, NUM_PTHREADS, &zeroi_items_per_thread, &zeroi_items_last_thread);
 
@@ -308,17 +300,17 @@ void * chol_pthread(void * arg)
 		//Elim work
 		int elimi_start, elimi_end;
 		int offset = (k + 1); //To account for not starting at i=0 each time
+
+		elimi_start=items_per_thread*id + offset;
 		if(id == (NUM_PTHREADS-1))
 		{
 			//Last thread
-			elimi_start=items_per_thread*id + offset;
-			elimi_end = items_per_thread*id + offset + items_last_thread;
+			elimi_end = elimi_start + items_last_thread;
 		}
 		else
 		{
 			//Regular threads
-			elimi_start=items_per_thread*id + offset;
-			elimi_end = items_per_thread*(id+1) -1 + offset;
+			elimi_end = elimi_start + items_per_thread -1 ;
 		}
 
 		// Elimination step
