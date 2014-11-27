@@ -20,7 +20,6 @@
 #include <winsock.h> /* For definition of "timeval" structure */
 #include <sys/timeb.h> /* For prototype of "_ftime()" */
 
-
 /*
  * gettimeofday() --  gets the current time in elapsed seconds and
  *                     microsends since GMT Jan 1, 1970.
@@ -30,29 +29,44 @@
  * RETURN CODES: -  0 on success
  *                 -1 on failure
  */
-int gettimeofday(curTimeP)
-    struct timeval *curTimeP;
-{
-struct _timeb  localTime;
+int gettimeofday(struct timeval *curTimeP){
+    struct _timeb localTime;
 
-    if (curTimeP == (struct timeval *) 0)
-    {
-      errno = EFAULT;
-      return (-1);
+    if (curTimeP == (struct timeval *) 0) {
+        errno = EFAULT;
+        return (-1);
     }
 
-   /*
-    *  Compute the elapsed time since Jan 1, 1970 by first
-    *  obtaining the elapsed time from the system using the
-    *  _ftime(..) call and then convert to the "timeval"
-    *  equivalent.
-    */
+    /*
+     *  Compute the elapsed time since Jan 1, 1970 by first
+     *  obtaining the elapsed time from the system using the
+     *  _ftime(..) call and then convert to the "timeval"
+     *  equivalent.
+     */
 
     _ftime(&localTime);
 
-    curTimeP->tv_sec  = localTime.time + localTime.timezone;
+    curTimeP->tv_sec = localTime.time + localTime.timezone;
     curTimeP->tv_usec = localTime.millitm * 1000;
 
-    return(0);
+    return (0);
+}
+
+
+
+
+struct timeval start_time_v;
+
+void start_time() {
+    // Start the timer here.
+    gettimeofday(&start_time_v);
+}
+
+float show_time() {
+    struct timeval stop;
+    gettimeofday(&stop);
+    float cpu_time = (float) (stop.tv_sec - start_time_v.tv_sec + (stop.tv_usec - start_time_v.tv_usec) / (float) 1000000);
+    printf("	Run time:    %0.10f s. \n", cpu_time);
+    return cpu_time;
 }
 
